@@ -1,0 +1,6 @@
+width = 640
+height = 480
+fps = 30
+pixelFormat = "rgb24"
+inputFormat = "dshow"
+deviceName = "video=ov9734_azurewave_camera"
