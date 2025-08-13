@@ -48,10 +48,6 @@ func (t *TLV) AsCompressedPointCloud() (*CompressedPointCloud, error) {
 }
 
 func (t *TLV) AsTargetList() (*[]Target, error) {
-	// if t.Header.Type != EXT_TARGET_LIST {
-	// 	return nil, fmt.Errorf("TLV type %d is not TargetList", t.Header.Type)
-	// }
-
 	var targets []Target
 	reader := bytes.NewReader(t.Value)
 
@@ -66,49 +62,22 @@ func (t *TLV) AsTargetList() (*[]Target, error) {
 	return &targets, nil
 }
 
-func (t *TLV) AsTargetIndex() ([]uint8, error) {
-	// if t.Header.Type != EXT_TARGET_INDEX {
-	// 	return nil, fmt.Errorf("TLV type %d is not TargetIndex", t.Header.Type)
-	// } // TODO
-
-	var indices []uint8
+func (t *TLV) AsUint8Slice() ([]uint8, error) {
+	var slice []uint8
 	reader := bytes.NewReader(t.Value)
 
 	for reader.Len() > 0 {
-		var index uint8
-		if err := binary.Read(reader, binary.LittleEndian, &index); err != nil {
-			return nil, fmt.Errorf("failed to read TargetIndex: %w", err)
+		var value uint8
+		if err := binary.Read(reader, binary.LittleEndian, &value); err != nil {
+			return nil, fmt.Errorf("failed to read uint8 value: %w", err)
 		}
-		indices = append(indices, index)
+		slice = append(slice, value)
 	}
 
-	return indices, nil
-}
-
-func (t *TLV) AsPresenceIndecation() ([]uint8, error) {
-	if t.Header.Type != PRESCENCE_INDICATION {
-		return nil, fmt.Errorf("TLV type %d is not PresenceIndication", t.Header.Type)
-	}
-
-	var presence []uint8
-	reader := bytes.NewReader(t.Value)
-
-	for reader.Len() > 0 {
-		var index uint8
-		if err := binary.Read(reader, binary.LittleEndian, &index); err != nil {
-			return nil, fmt.Errorf("failed to read PresenceIndication: %w", err)
-		}
-		presence = append(presence, index)
-	}
-
-	return presence, nil
+	return slice, nil
 }
 
 func (t *TLV) AsTargetHeight() (*[]TargetHeight, error) {
-	if t.Header.Type != TRACKERPROC_TARGET_HEIGHT {
-		return nil, fmt.Errorf("TLV type %d is not TargetHeight", t.Header.Type)
-	}
-
 	var heights []TargetHeight
 	reader := bytes.NewReader(t.Value)
 
