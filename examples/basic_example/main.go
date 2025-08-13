@@ -27,7 +27,7 @@ func main() {
 					fmt.Println("Error decoding target list:", err)
 					continue
 				}
-				for _, target := range *targets {
+				for _, target := range targets {
 					fmt.Printf("Target ID: %d, X: %.2f, Y: %.2f, Confidence: %.2f\n", target.ID, target.X, target.Y, target.Confidence)
 				}
 			}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (t *TLV) AsPointCloud() (*[]Point, error) {
+func (t *TLV) AsPointCloud() ([]Point, error) {
 	if t.Header.Type != DETECTED_POINTS {
 		return nil, fmt.Errorf("TLV type %d is not DetectedPoints", t.Header.Type)
 	}
@@ -21,33 +21,35 @@ func (t *TLV) AsPointCloud() (*[]Point, error) {
 		}
 	}
 
-	return &points, nil
+	return points, nil
 }
 
-func (t *TLV) AsCompressedPointCloud() (*CompressedPointCloud, error) {
+func (t *TLV) AsCompressedPointCloud() (cp CompressedPointCloud, err error) {
 	if t.Header.Type != COMPRESSED_POINTS {
-		return nil, fmt.Errorf("TLV type %d is not CompressedPoints", t.Header.Type)
+		err = fmt.Errorf("TLV type %d is not CompressedPoints", t.Header.Type)
+		return
 	}
 
-	var cp CompressedPointCloud
 	reader := bytes.NewReader(t.Value)
 
-	if err := binary.Read(reader, binary.LittleEndian, &cp.Unit); err != nil {
-		return nil, fmt.Errorf("failed to read PointUnit: %w", err)
+	if err = binary.Read(reader, binary.LittleEndian, &cp.Unit); err != nil {
+		err = fmt.Errorf("failed to read PointUnit: %w", err)
+		return
 	}
 
 	for reader.Len() > 0 {
 		var point CartesianPoint
-		if err := binary.Read(reader, binary.LittleEndian, &point); err != nil {
-			return nil, fmt.Errorf("failed to read CartesianPoint: %w", err)
+		if err = binary.Read(reader, binary.LittleEndian, &point); err != nil {
+			err = fmt.Errorf("failed to read CartesianPoint: %w", err)
+			return
 		}
 		cp.Points = append(cp.Points, point)
 	}
 
-	return &cp, nil
+	return cp, nil
 }
 
-func (t *TLV) AsTargetList() (*[]Target, error) {
+func (t *TLV) AsTargetList() ([]Target, error) {
 	var targets []Target
 	reader := bytes.NewReader(t.Value)
 
@@ -59,7 +61,7 @@ func (t *TLV) AsTargetList() (*[]Target, error) {
 		targets = append(targets, target)
 	}
 
-	return &targets, nil
+	return targets, nil
 }
 
 func (t *TLV) AsUint8Slice() ([]uint8, error) {
@@ -77,7 +79,7 @@ func (t *TLV) AsUint8Slice() ([]uint8, error) {
 	return slice, nil
 }
 
-func (t *TLV) AsTargetHeight() (*[]TargetHeight, error) {
+func (t *TLV) AsTargetHeight() ([]TargetHeight, error) {
 	var heights []TargetHeight
 	reader := bytes.NewReader(t.Value)
 
@@ -89,5 +91,5 @@ func (t *TLV) AsTargetHeight() (*[]TargetHeight, error) {
 		heights = append(heights, height)
 	}
 
-	return &heights, nil
+	return heights, nil
 }
